@@ -70,21 +70,21 @@ float swell(vec2 p){float a=.5,s=0.;for(int i=0;i<3;i++){s+=a*noise(p);p=p*2.02+
 float sea(vec2 q,float t){return swell(q+vec2(t*.3,t))+.5*swell(q*2.3-vec2(t*.2,t*1.4));}
 vec3 sky(vec3 d,vec3 sun,float clouds){
   float h=max(d.y,0.);
-  vec3 c=mix(vec3(1.,.76,.42),vec3(.99,.42,.36),smoothstep(0.,.06,h));
+  vec3 c=mix(vec3(.95,.64,.38),vec3(.99,.42,.36),smoothstep(0.,.06,h));
   c=mix(c,vec3(.66,.15,.52),smoothstep(.04,.22,h));
   c=mix(c,vec3(.22,.07,.40),smoothstep(.18,.46,h));
   c=mix(c,vec3(.055,.022,.15),smoothstep(.4,.95,h));
   float sd=max(dot(d,sun),0.);
-  c+=vec3(1.,.5,.2)*pow(sd,6.)*.34;
-  c+=vec3(1.,.76,.46)*pow(sd,40.)*.5;
+  c+=vec3(1.,.5,.2)*pow(sd,6.)*.22;
+  c+=vec3(1.,.76,.46)*pow(sd,40.)*.28;
   if(clouds>0.){
     vec2 cp=d.xz/(d.y+.18)*1.6+vec2(T*.006,T*.002);
     float cl=smoothstep(.46,.78,fbm(cp))*smoothstep(.012,.11,h)*(1.-smoothstep(.5,.92,h));
     vec3 cc=mix(vec3(.27,.09,.33),vec3(1.,.56,.42),pow(sd,3.)*.9+.12*(1.-h));
     c=mix(c,cc,cl*.78*clouds);
   }
-  c=mix(c,vec3(1.,.96,.80),smoothstep(.9971,.9981,sd));
-  c+=vec3(1.,.85,.6)*smoothstep(.985,.9995,sd)*.36;
+  c=mix(c,vec3(1.,.84,.58),smoothstep(.9971,.9981,sd));
+  c+=vec3(1.,.8,.55)*smoothstep(.985,.9995,sd)*.18;
   return c;
 }
 void main(){
