@@ -5,52 +5,55 @@
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const HORIZON = 0.34;   // fraction of the hero height, from the bottom. Matches --horizon in style.css
 
-  /* the city across the bay: two rows of towers in sunset haze, built once from a fixed seed */
+  /* the city across the bay: glass towers with lit floors and neon crowns, built once from a fixed seed */
   const holder = document.querySelector(".skyline");
   if (holder) {
-    let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    const W = 1000, H = 200, f = n => n.toFixed(1);
-    // downtown clusters: where the tall towers bunch up
-    const env = x => Math.max(Math.exp(-(((x - 300) / 120) ** 2)) * .8, Math.exp(-(((x - 560) / 95) ** 2)), Math.exp(-(((x - 790) / 110) ** 2)) * .55);
+    let seed = 23; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const W = 1000, H = 200, PX = 2.6, PY = 3.6, f = n => n.toFixed(1), pick = a => a[Math.floor(rnd() * a.length)];
+    const LIGHT = { w: "#ffe9c4", p: "#ff7fd0", b: "#8fc8ff" }, NEON = ["#ff3db8", "#c44dff", "#3d8bff", "#ff6bd6", "#ffd9f2"];
+    // window tiles: a few floors of lit and dark panes, repeated up each tower
+    let tiles = "";
+    for (const c in LIGHT) for (const [d, lit] of [["s", .42], ["d", .8]]) {
+      let r = "";
+      for (let i = 0; i < 10; i++) for (let k = 0; k < 10; k++) if (rnd() < lit) r += `<rect x="${f(i * PX + .5)}" y="${f(k * PY + .8)}" width="1.6" height="2" opacity="${f(.5 + rnd() * .5)}"/>`;
+      tiles += `<pattern id="${c}${d}ID" width="${PX * 10}" height="${PY * 10}" patternUnits="userSpaceOnUse"><g fill="${LIGHT[c]}">${r}</g></pattern>`;
+    }
+    const env = x => Math.max(Math.exp(-(((x - 250) / 150) ** 2)) * .8, Math.exp(-(((x - 520) / 120) ** 2)), Math.exp(-(((x - 800) / 130) ** 2)) * .75);
+    let streaks = "";
     function row(near) {
-      let x = near ? 20 : 0, out = "", glow = "";
-      while (x < W - 20) {
-        const e = env(x + 15), tall = rnd() < .25 + e * .5;
-        const w = near ? 16 + rnd() * 26 : 12 + rnd() * 22;
-        let h = (near ? 12 : 18) + rnd() * 16 + e * (tall ? 70 + rnd() * 80 : 20 + rnd() * 40) * (near ? .82 : 1);
-        h = Math.min(h, H - 8);
+      let x = near ? 14 : 0, out = "";
+      while (x < W - 24) {
+        const e = env(x + 18), tall = rnd() < .2 + e * .6, c = pick(["w", "w", "w", "p", "b"]);
+        const w = near ? 18 + rnd() * 20 : 14 + rnd() * 18;
+        const h = Math.min(H - 10, (near ? 14 : 22) + rnd() * 18 + e * (tall ? 80 + rnd() * 90 : 20 + rnd() * 44) * (near ? .88 : 1));
         const y = H - h, fill = `url(#${near ? "n" : "f"}ID)`;
         out += `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" fill="${fill}"/>`;
-        let top = y, tw = w, tx = x;
-        if (tall) {   // setbacks, then a crown, mast or slanted roof
-          for (let k = 0, n = Math.floor(rnd() * 3); k < n; k++) {
-            const th = 5 + rnd() * 12; tw *= .62 + rnd() * .2; tx = x + (w - tw) * (.3 + rnd() * .4); top -= th;
-            out += `<rect x="${f(tx)}" y="${f(top)}" width="${f(tw)}" height="${f(th + 1)}" fill="${fill}"/>`;
-          }
-          const style = rnd();
-          if (style < .35) { const mh = 10 + rnd() * 22; out += `<rect x="${f(tx + tw / 2 - .7)}" y="${f(top - mh)}" width="1.4" height="${f(mh)}" fill="${fill}"/>`; if (near) glow += `<circle cx="${f(tx + tw / 2)}" cy="${f(top - mh)}" r="1.5" fill="#ff5a6e"/>`; }
-          else if (style < .55) out += `<path d="M${f(tx)} ${f(top + 1)}L${f(tx + tw)} ${f(top + 1)}L${f(tx + tw)} ${f(top - 4 - rnd() * 8)}Z" fill="${fill}"/>`;
-          else if (style < .7) out += `<path d="M${f(tx)} ${f(top + 1)}Q${f(tx + tw / 2)} ${f(top - tw * .5)} ${f(tx + tw)} ${f(top + 1)}Z" fill="${fill}"/>`;
-        } else if (rnd() < .5) out += `<rect x="${f(x + w * .2)}" y="${f(y - 3)}" width="${f(w * .3)}" height="4" fill="${fill}"/>`;   // rooftop plant
-        // the sun sits to the right, so right-hand faces catch it
-        out += `<rect x="${f(x + w - (near ? 2.4 : 1.6))}" y="${f(y)}" width="${near ? 2.4 : 1.6}" height="${f(h)}" fill="#ffb27a" opacity="${near ? .5 : .32}"/>`;
-        if (near) {   // lit windows on a regular grid, floor by floor
-          const cols = Math.floor((w - 6) / 4.6), rows = Math.floor((h - 8) / 6.2), lit = .18 + rnd() * .3;
-          for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (rnd() < lit)
-            glow += `<rect x="${f(x + 3 + c * 4.6)}" y="${f(y + 5 + r * 6.2)}" width="2.4" height="3.2" fill="${rnd() < .8 ? "#ffd9a0" : "#bfe9ff"}" opacity="${f(.55 + rnd() * .45)}"/>`;
+        let top = y;
+        if (tall && rnd() < .4) { const tw = w * (.5 + rnd() * .3), th = 5 + rnd() * 10; top = y - th; out += `<rect x="${f(x + (w - tw) / 2)}" y="${f(top)}" width="${f(tw)}" height="${f(th + 1)}" fill="${fill}"/>`; }
+        if (tall && rnd() < .3) { const mh = 8 + rnd() * 16; out += `<rect x="${f(x + w / 2 - .6)}" y="${f(top - mh)}" width="1.2" height="${f(mh)}" fill="${fill}"/>`; }
+        // lit floors, snapped to the shared window grid so no pane is cut by a wall
+        const wx = Math.ceil((x + 1.5) / PX) * PX, ww = Math.floor((x + w - 1.5 - wx) / PX) * PX;
+        if (ww > 0) out += `<rect x="${wx}" y="${f(y + 4)}" width="${ww}" height="${f(h - 5)}" fill="url(#${c}${rnd() < .45 ? "d" : "s"}ID)" opacity="${near ? 1 : .4}"/>`;
+        if (near) {
+          const neon = pick(NEON);
+          if (rnd() < .22) out += `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" fill="${neon}" opacity=".22"/>`;   // a tower washed in colour
+          if (tall && rnd() < .7) out += `<rect x="${f(x - 2)}" y="${f(y - 4)}" width="${f(w + 4)}" height="9" fill="${neon}" opacity=".55" filter="url(#gID)"/><rect x="${f(x)}" y="${f(y - .6)}" width="${f(w)}" height="2.6" fill="${neon}"/><rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height=".9" fill="#fff" opacity=".8"/>`;
+          streaks += `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" fill="${tall ? neon : LIGHT[c]}" opacity="${tall ? .34 : 0}"/>`;
         }
-        x += w + (rnd() < .22 ? 3 + rnd() * 14 : -1 - rnd() * 3);
+        x += w + (rnd() < .2 ? 2 + rnd() * 10 : -2 - rnd() * 4);
       }
-      return out + glow;
+      return out;
     }
     const far = row(false), near = row(true);
-    const svg = (cls, id) => `<svg class="${cls}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs>
-      <linearGradient id="f${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d3384"/><stop offset="1" stop-color="#d0637f"/></linearGradient>
-      <linearGradient id="n${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1046"/><stop offset=".7" stop-color="#4f1d62"/><stop offset="1" stop-color="#8a3570"/></linearGradient>
-      <linearGradient id="h${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a6a" stop-opacity="0"/><stop offset="1" stop-color="#ff9a6a" stop-opacity=".55"/></linearGradient>
-      <filter id="r${id}" x="-5%" width="110%"><feTurbulence type="fractalNoise" baseFrequency=".012 .3" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="1.4 .5"/></filter></defs>
-      <g ${cls ? `filter="url(#r${id})"` : ""}><g opacity=".85">${far.replaceAll("ID", id)}</g>${near.replaceAll("ID", id)}
-      <rect y="${H - 5}" width="${W}" height="5" fill="#2a1046"/><rect y="${H - 46}" width="${W}" height="46" fill="url(#h${id})"/></g></svg>`;
+    let shore = "";
+    for (let x = 4; x < W; x += 3 + rnd() * 7) shore += `<circle cx="${f(x)}" cy="${H - 3.4}" r="${f(.7 + rnd() * .6)}" fill="${pick(["#ffe9c4", "#ffe9c4", "#ff7fd0", "#8fc8ff"])}"/>`;
+    const svg = (cls, id) => `<svg class="${cls}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs>${tiles.replaceAll("ID", id)}
+      <linearGradient id="f${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b2a72"/><stop offset="1" stop-color="#a9506f"/></linearGradient>
+      <linearGradient id="n${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0b33"/><stop offset=".75" stop-color="#2c1147"/><stop offset="1" stop-color="#55204f"/></linearGradient>
+      <filter id="g${id}" x="-30%" y="-200%" width="160%" height="500%"><feGaussianBlur stdDeviation="3"/></filter>
+      <filter id="r${id}" x="-5%" width="110%"><feTurbulence type="fractalNoise" baseFrequency=".008 .24" numOctaves="2" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="18" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="1.6 .6"/></filter></defs>
+      <g ${cls ? `filter="url(#r${id})"` : ""}><g opacity=".8">${far.replaceAll("ID", id)}</g>${near.replaceAll("ID", id)}
+      <rect y="${H - 6}" width="${W}" height="6" fill="#1a0b33"/>${shore}${cls ? streaks : ""}</g></svg>`;
     holder.innerHTML = svg("", "a") + svg("mirror", "b");
   }
 

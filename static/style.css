@@ -40,11 +40,11 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opa
   /* shown until the live scene paints, and when WebGL is unavailable */
   background:linear-gradient(180deg,#10062a 0%,#34105f 26%,#9d2480 48%,#f96a5c 62%,#ffbd66 66%,#5b1f63 66.2%,#2a0f45 80%,#150a26 100%)}
 #scene{position:absolute;inset:0;width:100%;height:100%;z-index:-4;display:block}
-.skyline{position:absolute;z-index:-3;left:35%;bottom:var(--horizon);width:min(40vw,780px);aspect-ratio:5/1;pointer-events:none;
+.skyline{position:absolute;z-index:-3;left:34%;bottom:var(--horizon);width:min(45vw,880px);aspect-ratio:5/1;pointer-events:none;
   translate:calc(var(--px) * -6px) 0}
 .skyline svg{position:absolute;left:0;bottom:0;width:100%;height:100%;overflow:visible}
-.skyline .mirror{top:100%;bottom:auto;transform:translateY(70%) scaleY(-.7);transform-origin:top;opacity:.5;
-  -webkit-mask-image:linear-gradient(0deg,#000,transparent 85%);mask-image:linear-gradient(0deg,#000,transparent 85%)}
+.skyline .mirror{top:100%;bottom:auto;transform:translateY(110%) scaleY(-1.1);transform-origin:top;opacity:.62;
+  -webkit-mask-image:linear-gradient(0deg,#000 10%,transparent 78%);mask-image:linear-gradient(0deg,#000 10%,transparent 78%)}
 .palms{position:absolute;z-index:-2;bottom:-8px;height:min(470px,66%);fill:#0d0519;pointer-events:none;transform-origin:50% 100%;
   animation:sway 9s ease-in-out infinite alternate;filter:drop-shadow(0 0 22px rgba(13,5,25,.55))}
 .palms.l{left:-78px;height:min(310px,42%);translate:calc(var(--px) * -22px) calc(var(--py) * -6px);animation-duration:11s}
