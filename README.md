@@ -2,7 +2,17 @@
 
 Paste a GTA 6 stream, get captioned vertical Shorts in a library, ready to download and post. Runs on your own PC. No accounts, no keys, nothing leaves your machine except the stream download.
 
-## Run it
+## Let Claude or Codex set it up
+
+Open Claude Code or Codex in an empty folder and paste this:
+
+```
+Clone https://github.com/coulditbecoley/clip-crew and follow its AGENTS.md to install it, run the self-checks, start it and open it in my browser.
+```
+
+The agent installs what is missing, checks that it works and starts it for you.
+
+## Run it yourself
 
 You need Python 3.10 or newer and [ffmpeg](https://ffmpeg.org/download.html) on your PATH.
 
@@ -11,7 +21,7 @@ pip install -r requirements.txt
 python server.py
 ```
 
-Then open http://127.0.0.1:5177. On Windows you can double-click `start.cmd` instead.
+Then open http://127.0.0.1:5177. After the first time, double-click `start.cmd` on Windows or run `./start.sh` on macOS and Linux.
 
 ## What it does
 

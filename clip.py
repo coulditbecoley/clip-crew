@@ -65,7 +65,13 @@ def srt_time(t):
 def caption(wav, srt, model):
     """Whisper the clip and write 3 word captions. Returns the transcript."""
     # vad_filter: without it Whisper invents lines like "Thanks for watching!" over music
-    segments, _ = model.transcribe(str(wav), word_timestamps=True, vad_filter=True)
+    # Read the 16 kHz mono wav ourselves: faster-whisper's own file reader breaks on some PyAV versions
+    import wave
+    import numpy as np
+    with wave.open(str(wav), "rb") as f:
+        assert (f.getframerate(), f.getnchannels(), f.getsampwidth()) == (16000, 1, 2), "expected 16 kHz mono 16-bit wav"
+        audio = np.frombuffer(f.readframes(f.getnframes()), dtype=np.int16).astype(np.float32) / 32768
+    segments, _ = model.transcribe(audio, word_timestamps=True, vad_filter=True)
     words = [w for s in segments for w in s.words]
     lines = [words[i:i + 3] for i in range(0, len(words), 3)]
     srt.write_text("".join(
